@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+enum Direction{pra_frente,pra_tras};
 class Boneco {
     GLfloat gX;
     GLfloat gY;
@@ -14,6 +15,9 @@ class Boneco {
     GLfloat R;
     GLfloat G;
     GLfloat B;
+    GLfloat gVel;
+    GLfloat gWel;
+    int isCPU; 
 private:
         void DrawHead(GLfloat raio, GLfloat R, GLfloat  G , GLfloat B);
         void DesenhaCirc(  GLfloat radius, GLfloat R, 
@@ -36,6 +40,8 @@ public:
             R = 1;
             G = 1;
             B = 0;
+            gVel = 0.4;
+            gWel = 1;
     };
     void Desenha(){ 
         DesenhaBoneco(gX, gY, radius, gTheta1, 
@@ -48,6 +54,12 @@ public:
     };
     GLfloat* ObtemYadress(){
         return &gY;
+    };
+     GLfloat* ObtemVel(){
+        return &gVel;
+    };
+     GLfloat* ObtemaAngularVel(){
+        return &gWel;
     };
     GLfloat* ObtemTheta1adress(){
         return &gTheta1;
@@ -64,7 +76,7 @@ public:
     void changeRadius(GLfloat a){
         radius = a;
     };
-    void setBoneco(GLfloat x, GLfloat y, GLfloat raio, int player, GLfloat theta){
+    void setBoneco(GLfloat x, GLfloat y, GLfloat raio, int player, GLfloat theta, int maquina){
         gX = x;
         gY = y;
         radius = raio;
@@ -75,10 +87,12 @@ public:
         else{
             R=0;G=1;B=0;
         }
+        isCPU = maquina;
     };
    
-    void MudaAngulo(GLfloat delta);
-    void Move(GLdouble time, int direction);
+    void MudaAngulo(GLfloat delta,GLdouble time);
+    void Move(GLdouble time, Direction direction, GLfloat inimigoX, GLfloat inimigoY);
+    bool Colisao(GLdouble time, Direction direction, GLfloat inimigoX, GLfloat inimigoY);
 
 };
 #endif	

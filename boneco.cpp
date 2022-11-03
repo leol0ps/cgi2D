@@ -47,7 +47,7 @@ void Boneco::DesenhaBoneco(GLfloat x, GLfloat y,GLfloat raio, GLfloat gTheta1, G
 
     glPushMatrix();
     
-    printf("%f\n",bodyTheta);
+    //printf("%f\n",bodyTheta);
     glTranslatef(x,y,0);
     glRotatef(bodyTheta,0,0,1);
     DesenhaBraco((raio-raio/7),0, (raio/4) , (raio*2),  (gTheta1+45),135, (raio/3));
@@ -58,31 +58,58 @@ void Boneco::DesenhaBoneco(GLfloat x, GLfloat y,GLfloat raio, GLfloat gTheta1, G
     glPopMatrix();
 }
 
-void Boneco::MudaAngulo(GLfloat delta){
-    *(obtemAngulo())+= delta;
+void Boneco::MudaAngulo(GLfloat delta,GLdouble time){
+    *(obtemAngulo())+= delta*time;
 }
 float Boneco::Modulo(float a){
     if(a>0)
         return a;
     else return -a;
 }
-void Boneco::Move(GLdouble time, int direction){
-    float x,y;
-    x= 10*cos((*(obtemAngulo()) +90)*M_PI/180);//*time;
-    y= 10*sin((*(obtemAngulo()) + 90)*M_PI/180);//*time;
-    if(!direction){
+GLfloat quadrado(GLfloat a){
+    return a*a;
+}
+void Boneco::Move(GLdouble time, Direction direction, GLfloat inimigoX, GLfloat inimigoY){
+    float x=0,y=0;
+    float vel = *ObtemVel();
+    
+    x= vel*cos((*(obtemAngulo()) +90)*M_PI/180)*time;
+    y= vel*sin((*(obtemAngulo()) + 90)*M_PI/180)*time;
+    if(direction==pra_tras){
         x=-x;
         y=-y;
     }
+    printf("%f, %f, %f\n", vel, time, x);
+    float colisionRadius = *(obtemRaio())*3;
+    float distancia = sqrt(quadrado((*ObtemXadress())-inimigoX) + quadrado(*(ObtemYadress()) - inimigoY));
     if((Modulo((*(ObtemXadress())+x))  + *obtemRaio())> ((float)Width/2) | (Modulo(*(ObtemYadress())+y) +  *obtemRaio()) > ((float)Height/2)){
         if(*ObtemXadress() > 0 && x < 0 | *ObtemXadress() < 0 && x > 0){
             *ObtemXadress()+=x;
+        }
+        if(*(ObtemYadress()) > 0 && y < 0 | *(ObtemYadress()) < 0 && y > 0){
             *ObtemYadress()+=y;
         }
+        
     }
     else{
             *ObtemXadress()+=x;
             *ObtemYadress()+=y;
     }
   
+}
+
+bool Boneco::Colisao(GLdouble time, Direction direction, GLfloat inimigoX, GLfloat inimigoY){
+    float x,y;
+    x= (*ObtemVel())*cos((*(obtemAngulo()) +90)*M_PI/180)*time;//*time;
+    y= (*ObtemVel())*sin((*(obtemAngulo()) + 90)*M_PI/180)*time;//*time;
+    if(direction==pra_tras){
+        x=-x;
+        y=-y;
+    }
+    float colisionRadius = *(obtemRaio())*3;
+    float distancia = sqrt(quadrado((*ObtemXadress())-inimigoX) + quadrado(*(ObtemYadress()) - inimigoY));
+    if(*(obtemRaio()) + colisionRadius > distancia){
+        return true;
+    }
+    return false;
 }
