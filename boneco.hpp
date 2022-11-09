@@ -4,42 +4,55 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+enum Color{red,yellow,blue,green};
+enum Direction{pra_frente,pra_tras};
+enum socoHand{left,right};
 class Boneco {
     GLfloat gX;
     GLfloat gY;
-    GLfloat gTheta1;
+    GLfloat gThetaRight;
+    GLfloat gThetaLeft;
     GLfloat gTheta2;
+    GLfloat gTheta3;
     GLfloat bodyTheta;
     GLfloat radius;
     GLfloat R;
     GLfloat G;
     GLfloat B;
+    GLfloat gVel;
+    GLfloat gWel;
+    int isCPU; 
 private:
         void DrawHead(GLfloat raio, GLfloat R, GLfloat  G , GLfloat B);
         void DesenhaCirc(  GLfloat radius, GLfloat R, 
                     GLfloat G, GLfloat B);
-        void DesenhaBraco(   GLfloat x, GLfloat y, GLfloat largura, GLfloat altura, GLfloat gTheta1, 
+        void DesenhaBraco(   GLfloat x, GLfloat y, GLfloat largura, GLfloat altura, GLfloat gThetaRight, 
                     GLfloat gTheta2, GLfloat raio);
-        void DesenhaBoneco(GLfloat x, GLfloat y,GLfloat raio, GLfloat gTheta1, GLfloat gTheta2, GLfloat bodyTheta, GLfloat R, GLfloat G, GLfloat B);
+        void DesenhaBoneco(GLfloat x, GLfloat y,GLfloat raio, GLfloat gThetaRight, GLfloat gThetaLeft, GLfloat gTheta2, GLfloat gTheta3, GLfloat bodyTheta, GLfloat R, GLfloat G, GLfloat B);
 
         void DesenhaRect(  GLint height, GLint width, 
                     GLfloat R, GLfloat G, GLfloat B);
         float Modulo(float a);
+        
 public:
     Boneco(){
             gX = 0;
             gY = 0;
             radius = 0;
-            gTheta1 = 180;
-            gTheta2 = 45;
+            gThetaRight = 225;
+            gThetaLeft = 135;
+            gTheta2 = 135;
+            gTheta3 = -135;
             bodyTheta = 0;
             R = 1;
             G = 1;
             B = 0;
+            gVel = 0.4;
+            gWel = 1;
     };
     void Desenha(){ 
-        DesenhaBoneco(gX, gY, radius, gTheta1, 
-                gTheta2, bodyTheta, R,G,B);
+        DesenhaBoneco(gX, gY, radius, gThetaRight, gThetaLeft,
+                gTheta2,gTheta3, bodyTheta, R,G,B);
          };
     void RodaBraco1(GLfloat inc);
     void RodaBraco2(GLfloat inc);
@@ -49,8 +62,20 @@ public:
     GLfloat* ObtemYadress(){
         return &gY;
     };
-    GLfloat* ObtemTheta1adress(){
-        return &gTheta1;
+     GLfloat* ObtemVel(){
+        return &gVel;
+    };
+     GLfloat* ObtemaAngularVel(){
+        return &gWel;
+    };
+    GLfloat* ObtemThetaRight(){
+        return &gThetaRight;
+        };
+    GLfloat* ObtemThetaLeft(){
+        return &gThetaLeft;
+        };
+    GLfloat* ObtemTheta3adress(){
+            return &gTheta3;
         };
     GLfloat* ObtemTheta2adress(){
             return &gTheta2;
@@ -64,7 +89,7 @@ public:
     void changeRadius(GLfloat a){
         radius = a;
     };
-    void setBoneco(GLfloat x, GLfloat y, GLfloat raio, int player, GLfloat theta){
+    void setBoneco(GLfloat x, GLfloat y, GLfloat raio, int player, GLfloat theta, int maquina){
         gX = x;
         gY = y;
         radius = raio;
@@ -75,10 +100,23 @@ public:
         else{
             R=0;G=1;B=0;
         }
+        isCPU = maquina;
     };
+    void changeRGB(GLfloat r, GLfloat g, GLfloat b){
+        R=r;
+        G = g;
+        B = b;
+
+    }
    
-    void MudaAngulo(GLfloat delta);
-    void Move(GLdouble time, int direction);
+    void MudaAngulo(GLfloat delta,GLdouble time);
+    void Move(GLdouble time, Direction direction, GLfloat inimigoX, GLfloat inimigoY);
+    bool Colisao(GLdouble time, Direction direction, GLfloat inimigoX, GLfloat inimigoY);
+    void MoveRightArm(GLfloat dx, GLfloat antiDelta);
+    void MoveLeftArm(GLfloat dx, GLfloat antiDelta);
+    void initPosition();
+    void changeColor();
+    bool socoColision(socoHand soco);
 
 };
-#endif	
+#endif

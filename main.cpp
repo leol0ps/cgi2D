@@ -7,17 +7,34 @@
 #include <math.h>
 #include <stdio.h>
 #include "boneco.hpp"
-
+GLdouble timeDiference;
 int Width;
 int Height;
 int animate=0;
 int keyStatus[256];
 Boneco boneco1P;
 Boneco boneco2P;
-#define incAngulo 10
-#define PraFrente 1
-#define PraTras 0
+#define incAngulo 0.3
+bool colision = false;
+bool ponto = false;
+float xDesloc;
+float initX;
+float initY;
+float ombroAngulo;
+int placar1P;
+int placar2P;
 
+void clique(int button, int state, int x, int y){
+    animate =1;
+    if(state == GLUT_UP){
+        animate=0;
+        boneco1P.initPosition();
+        
+    }
+        
+    initX = -((float)Width/2) + (float)x;
+    
+}
 
 void keyPress(unsigned char key, int x, int y)
 {
@@ -60,29 +77,65 @@ void renderScene(void)
 }
 void idle(){
     static GLdouble previousTime = glutGet(GLUT_ELAPSED_TIME);
-    GLdouble currentTime, timeDiference;
+    GLdouble currentTime;
 //Pega o tempo que passou do inicio da aplicacao
     currentTime = glutGet(GLUT_ELAPSED_TIME);
 // Calcula o tempo decorrido desde de a ultima frame.
     timeDiference = currentTime - previousTime;
 //Atualiza o tempo do ultimo frame ocorrido
+    previousTime = currentTime;
+    double inc = incAngulo;
     if(keyStatus[(int)('a')])
     {
-        boneco1P.MudaAngulo(incAngulo);
+        boneco1P.MudaAngulo(inc,timeDiference);
     }
     if(keyStatus[(int)('d')])
     {
-        boneco1P.MudaAngulo(-incAngulo);
+        boneco1P.MudaAngulo(-inc,timeDiference);
     }
     if(keyStatus[(int)('w')])
     {
-        boneco1P.Move(timeDiference,PraFrente);
+        colision = boneco1P.Colisao(timeDiference,pra_frente,*boneco2P.ObtemXadress(),*boneco2P.ObtemXadress());
+        if(!colision)
+        boneco1P.Move(timeDiference,pra_frente,*boneco2P.ObtemXadress(),*boneco2P.ObtemXadress());
+        
     }
     if(keyStatus[(int)('s')])
     {
-        boneco1P.Move(timeDiference,PraTras);
+        
+        colision = boneco1P.Colisao(timeDiference,pra_tras,*boneco2P.ObtemXadress(),*boneco2P.ObtemXadress());
+        if(!colision)
+        boneco1P.Move(timeDiference,pra_tras,*boneco2P.ObtemXadress(),*boneco2P.ObtemXadress());
+        
     }
+    if(ponto){
+        boneco2P.changeColor();
+    }
+    
     glutPostRedisplay();
+}
+void socoAnimate(int x,int y){
+    float atualX = -((float)Width/2) + (float)x;
+    if(animate){
+    
+    int dx = atualX - initX;
+    ombroAngulo = 90*dx/(((float)Width)/2);
+    float antiAngulo = -60*dx/(((float)Width)/2);
+    printf("%f ombro angulo\n", ombroAngulo);
+    
+        if(atualX>initX && dx<(((float)Width)/2)){
+            boneco1P.MoveRightArm(ombroAngulo, antiAngulo);
+        }
+        else if(atualX < initX && dx>-((float)Width)/2){
+            boneco1P.MoveLeftArm(ombroAngulo,antiAngulo);
+        }
+        else {
+            if(dx>0)
+                ponto = boneco1P.socoColision(right);
+            else
+                ponto = boneco1P.socoColision(left);
+        }
+    }
 }
 void ResetKeyStatus()
 {
@@ -115,7 +168,9 @@ int main(int argc, char * argv[]){
    float xdiff = atoi(doc.child("svg").child("rect").attribute("x").value());
    float ydiff = atoi(doc.child("svg").child("rect").attribute("y").value());
    Width = atoi(doc.child("svg").child("rect").attribute("width").value());
+   
    Height = atoi(doc.child("svg").child("rect").attribute("height").value());
+   xDesloc = ((float)Width)/2;
    float raio1 = atoi(doc.child("svg").child("circle").attribute("r").value());
    float raio2 = atoi(doc.child("svg").child("circle").next_sibling().attribute("r").value());
    float boneco1X = atoi(doc.child("svg").child("circle").attribute("cx").value());
@@ -128,8 +183,8 @@ int main(int argc, char * argv[]){
    boneco2X = boneco2X -xdiff -(float(Width)/2);
    boneco2Y = (float(Height)/2) - (boneco2Y - ydiff);
    float bodyTheta = -atan2((boneco1X -boneco2X),(boneco1Y-boneco2Y))*180/M_PI;
-   boneco1P.setBoneco(boneco1X,boneco1Y,raio1,0,(bodyTheta+180));
-   boneco2P.setBoneco(boneco2X,boneco2Y,raio2,1,bodyTheta);
+   boneco1P.setBoneco(boneco1X,boneco1Y,raio1,0,(bodyTheta+180),0);
+   boneco2P.setBoneco(boneco2X,boneco2Y,raio2,1,bodyTheta,1);
  
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -140,6 +195,8 @@ int main(int argc, char * argv[]){
    glutKeyboardFunc(keyPress);
    glutIdleFunc(idle);
    glutKeyboardUpFunc(keyup);
+   glutMouseFunc(clique);
+   glutMotionFunc(socoAnimate);
    init();
    glutMainLoop();
    return 0;
