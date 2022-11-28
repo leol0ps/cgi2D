@@ -3,7 +3,7 @@
 # $^ => os nomes de todos os prerequisitos separados por espacos
 #
 #
-PROJ_NAME=luta
+PROJ_NAME=trabalhocg
 C_SOURCE=$(wildcard *.cpp)
 H_SOURCE=$(wildcard *.h)
 OBJ=$(C_SOURCE:.c=.o)

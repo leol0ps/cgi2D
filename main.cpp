@@ -162,7 +162,10 @@ void CalcMaquina(){
         }
         else if(action > 60){//redireciona 
             float angulo = -atan2((*boneco2P.ObtemXadress()- *boneco1P.ObtemXadress()),(*boneco2P.ObtemYadress() - *boneco1P.ObtemYadress()))*180/M_PI;
-            if(angulo +180 > *boneco2P.obtemAngulo())
+            if( (angulo +180 < 2*incAngulo + *boneco2P.obtemAngulo()) &&  (angulo + 180 > *boneco2P.obtemAngulo() - 2*incAngulo)){
+
+            }
+            else if(angulo +180 > *boneco2P.obtemAngulo())
                 boneco2P.MudaAngulo(incAngulo,timeDiference);
             else if(angulo +180< *boneco2P.obtemAngulo()){
                 boneco2P.MudaAngulo(-incAngulo,timeDiference);
@@ -173,7 +176,7 @@ void CalcMaquina(){
             if(action >50){
                 socoArmM = left;
                 socoMaquina(socoArmM);
-                std::cout << action <<"\n";
+                //std::cout << action <<"\n";
             }
             else{
                 socoArmM = right;
@@ -218,11 +221,11 @@ void keyPress(unsigned char key, int x, int y)
              break;
         case 'a':
         case 'A':
-             keyStatus[(int)('a')] = 1; //Using keyStatus trick
+             keyStatus[(int)('a')] = 1; 
              break;
         case 'd':
         case 'D':
-             keyStatus[(int)('d')] = 1; //Using keyStatus trick
+             keyStatus[(int)('d')] = 1; 
              break;
         case 'w':
         case 'W':
@@ -361,7 +364,6 @@ void socoAnimate(int x,int y){
 void ResetKeyStatus()
 {
     int i;
-    //Initialize keyStatus
     for(i = 0; i < 256; i++)
        keyStatus[i] = 0; 
 }
